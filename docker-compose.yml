@@ -1,0 +1,30 @@
+version: "3.4"
+
+services:
+  redis:
+    image: redis:latest
+  db:
+    image: mysql:latest
+    environment:
+      - MYSQL_ROOT_PASSWORD=pass
+      - MYSQL_DATABASE=urlshortner
+    volumes:
+      - ./init_db:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+  web:
+    build: .
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DB_USER=root
+      - DB_PASSWD=pass
+      - DB_ADDR=db:3306
+      - DB_NAME=urlshortner
+    ports:
+      - "8080:8080"
+    entrypoint: ["./web"]
+    restart: "on-failure"
