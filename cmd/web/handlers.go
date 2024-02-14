@@ -109,10 +109,23 @@ func shortUrlHandle(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	// lets send this to background
-	go func(u database.UrlDetail) {
-		repo.RecordMeta(u.ID, r.RemoteAddr, "", "")
-	}(urlDetail)
+	// TODO send the meta updation part to background
+	go func(u database.UrlDetail, r *http.Request) {
+		var ip string
+		if len(r.RemoteAddr) <= 21 {
+			// ip (15) + ':'(1) + port(5)
+			// this is an ipv4 address
+			ip = strings.Split(r.RemoteAddr, ":")[0]
+		} else {
+			// ipv6 address
+			s := strings.Split(r.RemoteAddr, ":")
+			ip = strings.Join(s[:len(s)-1], ":")
+		}
+		err = repo.RecordMeta(u.ID, ip, "", "")
+		if err != nil {
+			log.Printf("web.handlers.shortUrlHandle: repo.RecordMeta failed with %v", err)
+		}
+	}(urlDetail, r)
 
 	w.Header().Set("location", urlDetail.LongUrl)
 	w.WriteHeader(http.StatusPermanentRedirect)
