@@ -8,7 +8,7 @@ CREATE TABLE `url_maps` (
 );
 CREATE TABLE `url_meta` (
   `url_id` int NOT NULL,
-  `ip` varchar(15) NOT NULL,
+  `ip` varchar(40) NOT NULL,
   `location` varchar(60) NOT NULL,
   `device_type` varchar(50) NOT NULL,
   FOREIGN KEY (`url_id`) REFERENCES `url_maps` (`id`)
