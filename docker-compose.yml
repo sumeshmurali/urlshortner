@@ -9,7 +9,7 @@ services:
       - MYSQL_ROOT_PASSWORD=pass
       - MYSQL_DATABASE=urlshortner
     volumes:
-      - ./init_db:/docker-entrypoint-initdb.d
+      - ./db_files/init_db:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
       timeout: 20s

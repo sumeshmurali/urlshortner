@@ -2,6 +2,7 @@ CREATE TABLE `url_maps` (
   `id` int NOT NULL AUTO_INCREMENT,
   `url` varchar(36) NOT NULL,
   `long_url` varchar(500) NOT NULL,
+  `created_at` datetime default current_timestamp,
   `visit_count` int DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `url` (`url`)
