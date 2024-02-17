@@ -1,0 +1,1 @@
+ab -T 'application/x-www-form-urlencoded' -v 1 -n 100000 -c 10000 -p post_data.txt http://localhost:8080/shorten
