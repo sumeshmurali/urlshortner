@@ -136,8 +136,6 @@ func shortUrlHandle(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("location", urlDetail.LongUrl)
 	// disables caching so that visit count can be properly tracked
 	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate") // HTTP 1.1.
-	w.Header().Set("Pragma", "no-cache")                                   // HTTP 1.0.
-	w.Header().Set("Expires", "0")                                         // Proxies.
 	w.WriteHeader(http.StatusMovedPermanently)
 	// w.Write([]byte(fmt.Sprintf("Redirecting you to the target url in a moment - %v", url)))
 }
