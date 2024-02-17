@@ -33,8 +33,20 @@ I wanted to benchmark how does a simple setup like the following will perform.
 
 ![Image for naive approach](./assets/v1_naive_normal_db.png "Naive approach")
 
-Results
+### Results
 
+#### Writes
 | Request/Sec | Time/Req  (in milliseconds) |
 |-------------|-----------------------------|
-| 2678.84     | 3732.9                      |
+| 2935.60     | 3406.456                    |
+
+
+#### Reads
+| Request/Sec | Time/Req  (in milliseconds) |
+|-------------|-----------------------------|
+|143.21       |  69825.458                  |
+
+### Findings
+- The reads are extremely slow (143 req per seconds)
+- The writes are also slow (close to 3000)
+- The performance should be better for a database of 0.1 Million rows
