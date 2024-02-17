@@ -11,6 +11,7 @@ import (
 
 type Repository interface {
 	GetUrlDetail(url string) (UrlDetail, error)
+	GetUrls(limit int) ([]UrlDetail, error)
 	SetLongUrl(url, longUrl string) (int64, error)
 	RecordMeta(urlId int, ip, location, deviceType string) error
 	Init() error
@@ -62,6 +63,38 @@ func (m *MysqlRepo) GetUrlDetail(url string) (UrlDetail, error) {
 		return u, fmt.Errorf("GetUrlDetail: retrieving %s failed with %v", url, err)
 	}
 	return u, err
+}
+
+// GetUrls fetches the urls from the database
+// Set the limit variable limit the results.
+// A limit of -1 will return all the results but is not recommended
+func (m *MysqlRepo) GetUrls(limit int) ([]UrlDetail, error) {
+	if !m.initialized {
+		return nil, errors.New("GetUrlDetail: repository is not initialized. Did you forget to call Init()?")
+	}
+	query := "SELECT url, long_url, visit_count from url_maps order by created_at desc"
+
+	if limit >= 0 {
+		// fetch all results
+		query = query + fmt.Sprintf(" limit %d", limit)
+	}
+	rows, err := m.db.Query(query)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+	var results []UrlDetail
+	for rows.Next() {
+		var u UrlDetail
+		err = rows.Scan(&u.Url, &u.LongUrl, &u.VisitCount)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, u)
+	}
+	return results, nil
 }
 
 // SetLongUrl creates a new record with the given url and longUrl
