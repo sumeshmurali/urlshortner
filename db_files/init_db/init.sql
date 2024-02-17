@@ -15,4 +15,4 @@ CREATE TABLE `url_meta` (
   FOREIGN KEY (`url_id`) REFERENCES `url_maps` (`id`)
 );
 
--- CREATE UNIQUE INDEX idx_urls ON url_maps (url);
+CREATE UNIQUE INDEX idx_urls ON url_maps (url);

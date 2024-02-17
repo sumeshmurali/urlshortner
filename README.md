@@ -27,7 +27,28 @@ Note: I have only tested locally
 - Measure of 100000 writes to the database with concurrency of 10000
 - Measure of 100000 reads to the database with concurrency of 10000
 
-# v1_naive_normal_db - The naive approach
+# v1.1_indexed_db - indexes the shortened url field for faster queries
+
+Index the url column for faster lookups
+
+### Results
+
+#### Writes
+| Request/Sec | Time/Req  (in milliseconds) |
+|-------------|-----------------------------|
+| 1832.98     | 5455.583                    |
+
+
+#### Reads
+| Request/Sec | Time/Req  (in milliseconds) |
+|-------------|-----------------------------|
+|142.90       |  69980.019                  |
+
+### Findings
+- indexing the db resulted in slower writes but no major change in read speed
+- This could be due to writing on multiple rows during reading for meta data
+
+# v1_naive_db - The naive approach
 
 I wanted to benchmark how does a simple setup like the following will perform. 
 
