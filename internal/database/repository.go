@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/go-sql-driver/mysql"
@@ -15,6 +16,7 @@ type Repository interface {
 	SetLongUrl(url, longUrl string) (int64, error)
 	RecordMeta(urlId int, ip, location, deviceType string) error
 	Init() error
+	Close()
 }
 
 func NewRepository() Repository {
@@ -28,6 +30,7 @@ type MysqlRepo struct {
 
 // Init Initializes the db variable and establishes a connection to the database
 func (m *MysqlRepo) Init() error {
+	log.Println("Initializing db connection")
 	cfg := mysql.Config{
 		User:   os.Getenv("DB_USER"),
 		Passwd: os.Getenv("DB_PASSWD"),
@@ -36,6 +39,8 @@ func (m *MysqlRepo) Init() error {
 		DBName: os.Getenv("DB_NAME"),
 	}
 	db, err := sql.Open("mysql", cfg.FormatDSN())
+	db.SetMaxOpenConns(50)
+	db.SetMaxOpenConns(100)
 	if err != nil {
 		return err
 	}
@@ -47,6 +52,10 @@ func (m *MysqlRepo) Init() error {
 	return nil
 }
 
+func (m *MysqlRepo) Close() {
+	_ = m.db.Close()
+}
+
 // GetUrlDetail retrives the details of the given shortened url
 func (m *MysqlRepo) GetUrlDetail(url string) (UrlDetail, error) {
 	if !m.initialized {
@@ -54,7 +63,6 @@ func (m *MysqlRepo) GetUrlDetail(url string) (UrlDetail, error) {
 	}
 	var u UrlDetail
 	row := m.db.QueryRow("SELECT id, url, long_url, visit_count from url_maps where url=?", url)
-
 	err := row.Scan(&u.ID, &u.Url, &u.LongUrl, &u.VisitCount)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -79,6 +87,10 @@ func (m *MysqlRepo) GetUrls(limit int) ([]UrlDetail, error) {
 		query = query + fmt.Sprintf(" limit %d", limit)
 	}
 	rows, err := m.db.Query(query)
+	defer func() {
+		e := rows.Close()
+		log.Printf("Error while attempting to close %v\n", e)
+	}()
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
@@ -103,7 +115,6 @@ func (m *MysqlRepo) SetLongUrl(url, longUrl string) (int64, error) {
 		return 0, errors.New("SetLongUrl: repository is not initialized. Did you forget to call Init()?")
 	}
 	r, err := m.db.Exec("INSERT INTO url_maps (url, long_url) values (?, ?)", url, longUrl)
-
 	if err != nil {
 		return 0, err
 	}
