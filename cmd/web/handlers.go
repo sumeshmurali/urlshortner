@@ -44,7 +44,13 @@ func index(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	t.ExecuteTemplate(w, "base", nil)
+	u, err := repo.GetUrls(10)
+	if err != nil {
+		log.Printf("web.handlers.index: repo.GetUrls failed with %v\n", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	t.ExecuteTemplate(w, "base", u)
 }
 
 func shortenUrlHandle(w http.ResponseWriter, r *http.Request) {
@@ -128,7 +134,11 @@ func shortUrlHandle(w http.ResponseWriter, r *http.Request) {
 	}(urlDetail, r)
 
 	w.Header().Set("location", urlDetail.LongUrl)
-	w.WriteHeader(http.StatusPermanentRedirect)
+	// disables caching so that visit count can be properly tracked
+	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate") // HTTP 1.1.
+	w.Header().Set("Pragma", "no-cache")                                   // HTTP 1.0.
+	w.Header().Set("Expires", "0")                                         // Proxies.
+	w.WriteHeader(http.StatusMovedPermanently)
 	// w.Write([]byte(fmt.Sprintf("Redirecting you to the target url in a moment - %v", url)))
 }
 
