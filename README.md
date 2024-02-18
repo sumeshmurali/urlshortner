@@ -27,26 +27,24 @@ Note: I have only tested locally
 - Measure of 100000 writes to the database with concurrency of 10000
 - Measure of 100000 reads to the database with concurrency of 10000
 
-# v1.1_indexed_db - indexes the shortened url field for faster queries
-
-Index the url column for faster lookups
+# v1.1 - Updating the short url usage meta data in the background
+I have used a goroutine to sent the updation to a background process thus returning early from the request
 
 ### Results
 
 #### Writes
 | Request/Sec | Time/Req  (in milliseconds) |
 |-------------|-----------------------------|
-| 1832.98     | 5455.583                    |
+| 2827.72     | 3536.414                    |
 
 
 #### Reads
 | Request/Sec | Time/Req  (in milliseconds) |
 |-------------|-----------------------------|
-|142.90       |  69980.019                  |
+|146.23       |   68385.246                 |
 
-### Findings
-- indexing the db resulted in slower writes but no major change in read speed
-- This could be due to writing on multiple rows during reading for meta data
+#### Findings
+- Even sending the request to bg doesn't help much and it seems to be stuck waiting for connections
 
 # v1_naive_db - The naive approach
 
